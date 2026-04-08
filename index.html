@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Arduino Lab: Aprende robótica con simulador | Grados 10-11</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* header */
+    .hero {
+      background: linear-gradient(135deg, #0b2b44, #1e4a6e);
+      color: white;
+      padding: 1.8rem 2rem;
+      border-radius: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .hero h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    /* dos columnas */
+    .two-columns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .theory-exercise {
+      flex: 1.2;
+      min-width: 280px;
+    }
+
+    .simulator-panel {
+      flex: 1.8;
+      min-width: 320px;
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      border-left: 5px solid #3b82f6;
+      padding-left: 0.8rem;
+      margin-bottom: 1rem;
+      color: #0c4a6e;
+    }
+
+    .card h3 {
+      font-size: 1.2rem;
+      margin: 1rem 0 0.5rem;
+      color: #1e3a8a;
+    }
+
+    .code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 1rem;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    .exercise-box {
+      background: #f8fafc;
+      border-radius: 1.2rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border: 1px solid #cbd5e1;
+    }
+
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 0.8rem 0;
+    }
+
+    .option {
+      background: #eef2ff;
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .option:hover {
+      background: #cbdffc;
+    }
+
+    input[type="radio"] {
+      accent-color: #2563eb;
+    }
+
+    .btn {
+      border: none;
+      background: #1e293b;
+      color: white;
+      font-weight: 600;
+      padding: 0.6rem 1.5rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+    }
+
+    .btn-success {
+      background: #0f5c4b;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .feedback {
+      margin-top: 0.8rem;
+      padding: 0.6rem;
+      border-radius: 1rem;
+      font-weight: 500;
+    }
+
+    .correct {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 4px solid #22c55e;
+    }
+
+    .wrong {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 4px solid #ef4444;
+    }
+
+    .simulator-frame {
+      width: 100%;
+      height: 500px;
+      border: none;
+      background: #1e293b;
+    }
+
+    .sim-toolbar {
+      background: #f1f5f9;
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 1rem;
+      border-radius: 1.5rem;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 800px) {
+      body {
+        padding: 1rem;
+      }
+      .simulator-frame {
+        height: 380px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="hero">
+    <h1>🔧 Arduino Lab: Robótica desde cero</h1>
+    <p>📘 Aprende programación de microcontroladores con teoría + simulador en vivo + ejercicios prácticos. Para grados 10 y 11.</p>
+  </div>
+
+  <div class="two-columns">
+    <!-- COLUMNA IZQUIERDA: Teoría y ejercicios -->
+    <div class="theory-exercise">
+      <!-- Tarjeta teoría -->
+      <div class="card">
+        <h2>💡 Conceptos esenciales</h2>
+        <p><strong>Arduino</strong> es una plataforma de electrónica open-source basada en hardware y software fáciles de usar. Un programa en Arduino tiene dos funciones principales:</p>
+        <ul style="margin: 0.8rem 0 0.8rem 1.5rem;">
+          <li><code>setup()</code> → se ejecuta una sola vez al inicio. Configura pines, comunicación serie, etc.</li>
+          <li><code>loop()</code> → se repite infinitamente. Aquí va la lógica principal.</li>
+        </ul>
+        <div class="code-block">
+          // Ejemplo: Encender un LED por 1 segundo, apagarlo 1 segundo<br>
+          void setup() {<br>
+          &nbsp;&nbsp;pinMode(13, OUTPUT);   // Configurar pin 13 como salida<br>
+          }<br>
+          void loop() {<br>
+          &nbsp;&nbsp;digitalWrite(13, HIGH); // Encender LED<br>
+          &nbsp;&nbsp;delay(1000);           // Esperar 1000 ms<br>
+          &nbsp;&nbsp;digitalWrite(13, LOW);  // Apagar LED<br>
+          &nbsp;&nbsp;delay(1000);<br>
+          }
+        </div>
+        <p>✅ <strong>digitalWrite(pin, HIGH/LOW)</strong> → envía voltaje (5V) o 0V.<br>
+        ✅ <strong>delay(ms)</strong> → pausa el programa durante milisegundos.</p>
+      </div>
+
+      <!-- Ejercicio 1: Completar código (LED parpadeo) -->
+      <div class="card">
+        <h2>📝 Ejercicio 1: Parpadeo de LED</h2>
+        <p>Completa el código para que el LED conectado al pin 13 parpadee cada <strong>500 milisegundos</strong> (encendido 500ms, apagado 500ms). Selecciona la opción correcta para el espacio en blanco:</p>
+        <div class="code-block">
+          void setup() {<br>
+          &nbsp;&nbsp;pinMode(13, OUTPUT);<br>
+          }<br>
+          void loop() {<br>
+          &nbsp;&nbsp;digitalWrite(13, HIGH);<br>
+          &nbsp;&nbsp;<u>__________</u>   // esperar medio segundo<br>
+          &nbsp;&nbsp;digitalWrite(13, LOW);<br>
+          &nbsp;&nbsp;delay(500);<br>
+          }
+        </div>
+        <div class="exercise-box">
+          <div class="options" id="exercise1Options">
+            <label class="option"><input type="radio" name="ex1" value="0"> A) delay(500)</label>
+            <label class="option"><input type="radio" name="ex1" value="1"> B) wait(500)</label>
+            <label class="option"><input type="radio" name="ex1" value="2"> C) time(500)</label>
+            <label class="option"><input type="radio" name="ex1" value="3"> D) pause(500)</label>
+          </div>
+          <button class="btn btn-primary" id="checkEx1Btn">Verificar respuesta</button>
+          <div id="ex1Feedback" class="feedback" style="margin-top: 0.8rem;"></div>
+        </div>
+      </div>
+
+      <!-- Ejercicio 2: Entrada digital (pulsador) -->
+      <div class="card">
+        <h2>📝 Ejercicio 2: Control con pulsador</h2>
+        <p>Teoría: <code>digitalRead(pin)</code> lee el estado de un botón (HIGH o LOW). Completa el siguiente programa para que el LED se encienda <strong>solo cuando el pulsador esté presionado</strong> (pulsador conectado al pin 2).</p>
+        <div class="code-block">
+          int ledPin = 13;<br>
+          int buttonPin = 2;<br>
+          void setup() {<br>
+          &nbsp;&nbsp;pinMode(ledPin, OUTPUT);<br>
+          &nbsp;&nbsp;pinMode(buttonPin, INPUT);<br>
+          }<br>
+          void loop() {<br>
+          &nbsp;&nbsp;int estado = digitalRead(buttonPin);<br>
+          &nbsp;&nbsp;if (estado == HIGH) {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(ledPin, <u>__________</u>);<br>
+          &nbsp;&nbsp;} else {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;digitalWrite(ledPin, LOW);<br>
+          &nbsp;&nbsp;}<br>
+          }
+        </div>
+        <div class="options" id="exercise2Options">
+          <label class="option"><input type="radio" name="ex2" value="0"> A) HIGH</label>
+          <label class="option"><input type="radio" name="ex2" value="1"> B) 1</label>
+          <label class="option"><input type="radio" name="ex2" value="2"> C) ON</label>
+          <label class="option"><input type="radio" name="ex2" value="3"> D) LOW</label>
+        </div>
+        <button class="btn btn-primary" id="checkEx2Btn">Verificar respuesta</button>
+        <div id="ex2Feedback" class="feedback" style="margin-top: 0.8rem;"></div>
+      </div>
+
+      <!-- Mini reto adicional (motivación robótica) -->
+      <div class="card">
+        <h2>🤖 Reto de robótica</h2>
+        <p>¿Qué modificación harías para que un robot avance cuando el sensor ultrasónico detecte un objeto a menos de 20 cm? (Pista: usar condicionales y <code>digitalWrite</code> en motores).</p>
+        <p><strong>💡 Piensa en la lógica y coméntalo con tu profesor.</strong> La aplicación te guiará en próximos módulos.</p>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: SIMULADOR WOKWI -->
+    <div class="simulator-panel">
+      <div class="sim-toolbar">
+        <span>🔌 Simulador interactivo (Wokwi)</span>
+        <span style="font-size: 0.8rem;">⭐ Edita el código dentro del simulador y ejecuta</span>
+      </div>
+      <!-- Iframe de Wokwi con un proyecto básico de Blink (LED en pin 13). Permite edición completa -->
+      <iframe 
+        class="simulator-frame" 
+        src="https://wokwi.com/arduino/projects/345633315131556434?view=editor" 
+        title="Simulador Arduino Wokwi - Blink"
+        allow="fullscreen">
+      </iframe>
+      <div style="padding: 0.8rem; background: #f8fafc; font-size: 0.8rem; text-align: center; border-top: 1px solid #cbd5e1;">
+        💡 <strong>Pruébalo:</strong> Modifica el delay en el simulador, haz clic en "Start Simulation" y observa el LED virtual.
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de recursos adicionales y evaluación general -->
+  <div class="card" style="margin-top: 0.5rem;">
+    <h2>📊 ¿Cómo usar esta herramienta?</h2>
+    <p>1️⃣ Lee la teoría de la izquierda. 2️⃣ Completa los ejercicios y verifica tus respuestas. 3️⃣ Experimenta con el simulador Wokwi (puedes cambiar el código, agregar un pulsador, etc.) 4️⃣ Al terminar, anota tu calificación y compártela con tu profesor.</p>
+    <p style="margin-top: 0.5rem;">🔁 <strong>Nota:</strong> Los ejercicios evalúan comprensión de sintaxis básica. Cada respuesta correcta suma 1 punto (máximo 2).</p>
+    <div style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+      <div><strong>Tu puntuación:</strong> <span id="scoreDisplay">0</span> / 2</div>
+      <button class="btn btn-success" id="sendScoreBtn">📧 Enviar calificación al correo</button>
+    </div>
+    <div id="globalFeedback"></div>
+  </div>
+
+  <footer>
+    © 2026 IED EL PUEBLO - MAVC EDUCACION - Iniciativa de Programación y Robótica Estudiantil<br>
+    🌟 Aprendizaje basado en simulación | Proyecto open source para grados 10 y 11
+  </footer>
+</div>
+
+<script>
+  // ---------- LÓGICA DE EJERCICIOS ----------
+  // Ejercicio 1: respuesta correcta: delay(500) (índice 0)
+  // Ejercicio 2: respuesta correcta: HIGH (índice 0) - también aceptamos 1? según opciones: A) HIGH
+  let ex1Correct = false;
+  let ex2Correct = false;
+
+  const ex1Radios = document.querySelectorAll('input[name="ex1"]');
+  const ex2Radios = document.querySelectorAll('input[name="ex2"]');
+  const ex1FeedbackDiv = document.getElementById('ex1Feedback');
+  const ex2FeedbackDiv = document.getElementById('ex2Feedback');
+  const checkEx1Btn = document.getElementById('checkEx1Btn');
+  const checkEx2Btn = document.getElementById('checkEx2Btn');
+  const scoreSpan = document.getElementById('scoreDisplay');
+  const sendScoreBtn = document.getElementById('sendScoreBtn');
+
+  function updateScore() {
+    let total = (ex1Correct ? 1 : 0) + (ex2Correct ? 1 : 0);
+    scoreSpan.innerText = total;
+    return total;
+  }
+
+  // Verificar ejercicio 1
+  function verifyEx1() {
+    let selected = null;
+    for (let radio of ex1Radios) {
+      if (radio.checked) {
+        selected = radio.value;
+        break;
+      }
+    }
+    if (selected === null) {
+      ex1FeedbackDiv.innerHTML = '⚠️ Selecciona una opción (A, B, C o D).';
+      ex1FeedbackDiv.className = 'feedback wrong';
+      return;
+    }
+    // correcto: delay(500) es value "0"
+    if (selected === "0") {
+      ex1Correct = true;
+      ex1FeedbackDiv.innerHTML = '✅ ¡Correcto! delay(500) detiene el programa 500 milisegundos. El LED parpadeará cada medio segundo.';
+      ex1FeedbackDiv.className = 'feedback correct';
+    } else {
+      ex1Correct = false;
+      ex1FeedbackDiv.innerHTML = '❌ Incorrecto. La función correcta es delay(500). En Arduino usamos delay() para pausas en milisegundos.';
+      ex1FeedbackDiv.className = 'feedback wrong';
+    }
+    updateScore();
+  }
+
+  // Verificar ejercicio 2
+  function verifyEx2() {
+    let selected = null;
+    for (let radio of ex2Radios) {
+      if (radio.checked) {
+        selected = radio.value;
+        break;
+      }
+    }
+    if (selected === null) {
+      ex2FeedbackDiv.innerHTML = '⚠️ Por favor selecciona una opción.';
+      ex2FeedbackDiv.className = 'feedback wrong';
+      return;
+    }
+    // correcto: HIGH (value "0") - también aceptar "1" ? La opción B es "1" que también es HIGH, pero en el contexto el estándar es HIGH
+    if (selected === "0") {
+      ex2Correct = true;
+      ex2FeedbackDiv.innerHTML = '✅ Correcto! digitalWrite(ledPin, HIGH) enciende el LED cuando el botón está presionado.';
+      ex2FeedbackDiv.className = 'feedback correct';
+    } else {
+      ex2Correct = false;
+      ex2FeedbackDiv.innerHTML = '❌ Incorrecto. La opción correcta es HIGH. Si el pulsador da HIGH (presionado), queremos encender el LED con HIGH.';
+      ex2FeedbackDiv.className = 'feedback wrong';
+    }
+    updateScore();
+  }
+
+  checkEx1Btn.addEventListener('click', verifyEx1);
+  checkEx2Btn.addEventListener('click', verifyEx2);
+
+  // Envío de calificación por correo (simple mailto)
+  function sendScoreEmail() {
+    const score = (ex1Correct ? 1 : 0) + (ex2Correct ? 1 : 0);
+    const total = 2;
+    const percent = (score / total) * 100;
+    const studentName = prompt("Ingresa tu nombre (opcional, para el reporte):", "Estudiante Arduino");
+    const nombreFinal = (studentName && studentName.trim() !== "") ? studentName.trim() : "Anónimo";
+    
+    const subject = encodeURIComponent("📊 Mi calificación - Arduino Lab (Grados 10-11)");
+    const body = `Resultado de aprendizaje en Arduino básico:
+👤 Estudiante: ${nombreFinal}
+📅 Fecha: ${new Date().toLocaleString()}
+⭐ Puntuación: ${score} / ${total} (${percent.toFixed(0)}%)
+
+Detalle ejercicios:
+- Ejercicio 1 (parpadeo LED con delay): ${ex1Correct ? "✔ Correcto" : "✘ Incorrecto"}
+- Ejercicio 2 (control con pulsador): ${ex2Correct ? "✔ Correcto" : "✘ Incorrecto"}
+
+✅ Recomendación: Practicar en el simulador Wokwi modificando tiempos y agregando componentes.
+
+🏫 C 2026 IED EL PUEBLO - MAVC EDUCACION - Iniciativa de Programación y Robótica Estudiantil
+🔗 Proyecto educativo: simulación + ejercicios prácticos.`;
+    
+    const mailtoLink = `mailto:miguev9711@hotmail.com?subject=${subject}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+    alert("📨 Se abrirá tu cliente de correo. Envía el mensaje para registrar tu calificación.");
+  }
+
+  sendScoreBtn.addEventListener('click', sendScoreEmail);
+
+  // Pequeña mejora: mostrar la calificación inicial en 0
+  updateScore();
+
+  // Instrucción adicional para que los estudiantes exploren el simulador
+  console.log("Simulador Wokwi incrustado. Pueden editar el código y ejecutar.");
+</script>
+</body>
+</html>
